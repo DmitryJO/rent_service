@@ -16,6 +16,14 @@ tags:
     description: Каталог арендуемых вещей
   - name: Categories
     description: Категории вещей
+  - name: Orders
+    description: Бронирование вещей
+  - name: Admin Orders
+    description: Администрирование заказов
+  - name: Admin Items
+    description: Администрирование каталога вещей
+  - name: Admin Categories
+    description: Администрирование категорий
 paths:
   /api/v1/auth/register:
     post:
@@ -36,17 +44,44 @@ paths:
   /api/v1/items:
     get:
       tags: [Items]
-      summary: Список вещей
+      summary: Список вещей с фильтрацией
       operationId: getItems
+      parameters:
+        - name: categoryId
+          in: query
+          schema:
+            type: integer
+            format: int64
+          description: ID категории
+        - name: minPrice
+          in: query
+          schema:
+            type: number
+          description: Минимальная цена за день
+        - name: maxPrice
+          in: query
+          schema:
+            type: number
+          description: Максимальная цена за день
+        - name: minQuantity
+          in: query
+          schema:
+            type: integer
+          description: Минимальное количество в наличии
+        - name: availableOnly
+          in: query
+          schema:
+            type: boolean
+          description: Только доступные для аренды (quantity > 0)
       responses:
         '200':
-          description: Список вещей (может быть пустым)
+          description: Список вещей
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  type: object
+                  $ref: '#/components/schemas/ItemResponse'
   /api/v1/categories:
     get:
       tags: [Categories]
@@ -60,4 +95,368 @@ paths:
               schema:
                 type: array
                 items:
-                  type: object
+                  $ref: '#/components/schemas/CategoryResponse'
+  /api/v1/orders:
+    post:
+      tags: [Orders]
+      summary: Создать бронирование
+      operationId: createOrder
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateOrderRequest'
+      responses:
+        '201':
+          description: Заказ создан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderResponse'
+        '409':
+          description: Нет доступности на выбранный период
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/v1/admin/orders:
+    get:
+      tags: [Admin Orders]
+      summary: Список всех заказов
+      operationId: adminGetOrders
+      parameters:
+        - name: X-Admin-Role
+          in: header
+          required: true
+          schema:
+            type: string
+          description: Заглушка admin-доступа до JWT (значение ADMIN)
+      responses:
+        '200':
+          description: Список заказов
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OrderResponse'
+        '403':
+          description: Доступ запрещён
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/v1/admin/orders/{id}/status:
+    patch:
+      tags: [Admin Orders]
+      summary: Изменить статус заказа
+      operationId: adminUpdateOrderStatus
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: X-Admin-Role
+          in: header
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateOrderStatusRequest'
+      responses:
+        '200':
+          description: Статус обновлён
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderResponse'
+  /api/v1/admin/orders/{id}/cancel:
+    post:
+      tags: [Admin Orders]
+      summary: Отменить заказ
+      operationId: adminCancelOrder
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: X-Admin-Role
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Заказ отменён
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderResponse'
+  /api/v1/admin/items:
+    get:
+      tags: [Admin Items]
+      summary: Список всех вещей
+      parameters:
+        - $ref: '#/components/parameters/AdminRoleHeader'
+      responses:
+        '200':
+          description: Список вещей
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ItemResponse'
+    post:
+      tags: [Admin Items]
+      summary: Создать вещь
+      parameters:
+        - $ref: '#/components/parameters/AdminRoleHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateItemRequest'
+      responses:
+        '201':
+          description: Вещь создана
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ItemResponse'
+  /api/v1/admin/items/{id}:
+    get:
+      tags: [Admin Items]
+      summary: Получить вещь по ID
+      parameters:
+        - $ref: '#/components/parameters/AdminRoleHeader'
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Вещь найдена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ItemResponse'
+    patch:
+      tags: [Admin Items]
+      summary: Обновить вещь
+      parameters:
+        - $ref: '#/components/parameters/AdminRoleHeader'
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateItemRequest'
+      responses:
+        '200':
+          description: Вещь обновлена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ItemResponse'
+    delete:
+      tags: [Admin Items]
+      summary: Удалить вещь
+      parameters:
+        - $ref: '#/components/parameters/AdminRoleHeader'
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: Вещь удалена
+  /api/v1/admin/categories:
+    post:
+      tags: [Admin Categories]
+      summary: Создать категорию
+      parameters:
+        - $ref: '#/components/parameters/AdminRoleHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCategoryRequest'
+      responses:
+        '201':
+          description: Категория создана
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CategoryResponse'
+components:
+  parameters:
+    AdminRoleHeader:
+      name: X-Admin-Role
+      in: header
+      required: true
+      schema:
+        type: string
+      description: Заглушка admin-доступа до JWT (значение ADMIN)
+  schemas:
+    CategoryResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        description:
+          type: string
+    ItemResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        categoryId:
+          type: integer
+          format: int64
+        categoryName:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        condition:
+          type: string
+          enum: [NEW, GOOD, FAIR, POOR]
+        pricePerDay:
+          type: number
+        quantity:
+          type: integer
+        imageUrls:
+          type: array
+          items:
+            type: string
+    CreateItemRequest:
+      type: object
+      required: [categoryId, name, pricePerDay, quantity]
+      properties:
+        categoryId:
+          type: integer
+          format: int64
+        name:
+          type: string
+        description:
+          type: string
+        condition:
+          type: string
+          enum: [NEW, GOOD, FAIR, POOR]
+          default: GOOD
+          description: Состояние вещи (по умолчанию GOOD)
+        pricePerDay:
+          type: number
+        quantity:
+          type: integer
+        imageUrls:
+          type: array
+          items:
+            type: string
+    UpdateItemRequest:
+      type: object
+      properties:
+        categoryId:
+          type: integer
+          format: int64
+        name:
+          type: string
+        description:
+          type: string
+        condition:
+          type: string
+          enum: [NEW, GOOD, FAIR, POOR]
+        pricePerDay:
+          type: number
+        quantity:
+          type: integer
+        imageUrls:
+          type: array
+          items:
+            type: string
+    CreateCategoryRequest:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+    CreateOrderRequest:
+      type: object
+      required: [itemId, customerFullName, customerPhone, startDate, endDate]
+      properties:
+        itemId:
+          type: integer
+          format: int64
+        customerFullName:
+          type: string
+        customerPhone:
+          type: string
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+    OrderResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        itemId:
+          type: integer
+          format: int64
+        customerFullName:
+          type: string
+        customerPhone:
+          type: string
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        status:
+          type: string
+          enum: [PENDING, CONFIRMED, CANCELLED, COMPLETED]
+    UpdateOrderStatusRequest:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [PENDING, CONFIRMED, CANCELLED, COMPLETED]
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string

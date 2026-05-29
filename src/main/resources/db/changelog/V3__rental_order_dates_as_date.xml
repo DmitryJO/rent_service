@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+
+    <changeSet id="V3-001-rental-orders-start-date-to-date" author="rent-service">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists schemaName="rent_service" tableName="rental_orders"/>
+                <columnExists schemaName="rent_service" tableName="rental_orders" columnName="start_date"/>
+                <sqlCheck expectedResult="timestamp with time zone">
+                    SELECT data_type
+                    FROM information_schema.columns
+                    WHERE table_schema = 'rent_service'
+                      AND table_name = 'rental_orders'
+                      AND column_name = 'start_date'
+                </sqlCheck>
+            </and>
+        </preConditions>
+        <modifyDataType schemaName="rent_service" tableName="rental_orders"
+                        columnName="start_date" newDataType="DATE"/>
+    </changeSet>
+
+    <changeSet id="V3-002-rental-orders-end-date-to-date" author="rent-service">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists schemaName="rent_service" tableName="rental_orders"/>
+                <columnExists schemaName="rent_service" tableName="rental_orders" columnName="end_date"/>
+                <sqlCheck expectedResult="timestamp with time zone">
+                    SELECT data_type
+                    FROM information_schema.columns
+                    WHERE table_schema = 'rent_service'
+                      AND table_name = 'rental_orders'
+                      AND column_name = 'end_date'
+                </sqlCheck>
+            </and>
+        </preConditions>
+        <modifyDataType schemaName="rent_service" tableName="rental_orders"
+                        columnName="end_date" newDataType="DATE"/>
+    </changeSet>
+
+</databaseChangeLog>

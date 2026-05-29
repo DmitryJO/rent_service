@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+
+    <changeSet id="V2-001-index-rental-orders-user-id" author="rent-service">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <dbms type="postgresql"/>
+                <tableExists schemaName="rent_service" tableName="rental_orders"/>
+                <not>
+                    <indexExists schemaName="rent_service" indexName="idx_rental_orders_user_id"/>
+                </not>
+            </and>
+        </preConditions>
+        <createIndex schemaName="rent_service" tableName="rental_orders" indexName="idx_rental_orders_user_id">
+            <column name="user_id"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="V2-002-index-rental-orders-item-id" author="rent-service">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <dbms type="postgresql"/>
+                <tableExists schemaName="rent_service" tableName="rental_orders"/>
+                <not>
+                    <indexExists schemaName="rent_service" indexName="idx_rental_orders_item_id"/>
+                </not>
+            </and>
+        </preConditions>
+        <createIndex schemaName="rent_service" tableName="rental_orders" indexName="idx_rental_orders_item_id">
+            <column name="item_id"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="V2-003-index-rental-orders-status" author="rent-service">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <dbms type="postgresql"/>
+                <tableExists schemaName="rent_service" tableName="rental_orders"/>
+                <not>
+                    <indexExists schemaName="rent_service" indexName="idx_rental_orders_status"/>
+                </not>
+            </and>
+        </preConditions>
+        <createIndex schemaName="rent_service" tableName="rental_orders" indexName="idx_rental_orders_status">
+            <column name="status"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="V2-004-index-rental-orders-start-date" author="rent-service">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <dbms type="postgresql"/>
+                <tableExists schemaName="rent_service" tableName="rental_orders"/>
+                <not>
+                    <indexExists schemaName="rent_service" indexName="idx_rental_orders_start_date"/>
+                </not>
+            </and>
+        </preConditions>
+        <createIndex schemaName="rent_service" tableName="rental_orders" indexName="idx_rental_orders_start_date">
+            <column name="start_date"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="V2-005-index-items-category-id" author="rent-service">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <dbms type="postgresql"/>
+                <tableExists schemaName="rent_service" tableName="items"/>
+                <not>
+                    <indexExists schemaName="rent_service" indexName="idx_items_category_id"/>
+                </not>
+            </and>
+        </preConditions>
+        <createIndex schemaName="rent_service" tableName="items" indexName="idx_items_category_id">
+            <column name="category_id"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>

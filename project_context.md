@@ -44,7 +44,7 @@ src/
     └─ resources/application.yml    — отключение БД для тестов
 ```
 
-### Текущий прогресс (MVP, шаги 1–3)
+### Текущий прогресс (MVP)
 
 | Шаг | Статус | Примечание |
 |-----|--------|------------|
@@ -52,7 +52,14 @@ src/
 | 2. Структура пакетов | ✅ | `api`, `domain`, `infrastructure` |
 | 3. Заглушки контроллеров + тесты | ✅ | `mvn test` — 4/4 passed |
 | 4. Swagger / OpenAPI | ✅ | `/swagger-ui/index.html` |
-| 5. Подключение БД | ⏳ | следующий шаг |
+| 5. Подготовка БД | ✅ | JPA, PostgreSQL, Liquibase в pom + placeholder‑ы |
+| 6. Миграции Liquibase | ✅ | V1/V2 changelog, seed категорий |
+| 7. Репозитории и сервисы | ✅ | entity + repository + service + H2 тесты |
+| 8. Контроллеры с БД | ✅ | DTO, фильтрация items, 18/18 тестов |
+| 9. Redis-кеш | ✅ | `@Cacheable`/`@CacheEvict` в `ItemService`, 20/20 тестов |
+| 10. Бронирование | ✅ | `createOrder`, pessimistic lock, `OrderController`, 26/26 тестов |
+| 11. Админ заказы | ✅ | `AdminOrderController`, stub `X-Admin-Role`, 32/32 тестов |
+| 12. JWT / Security | ⏳ | следующий шаг |
 
 ## Технологический стек
 
