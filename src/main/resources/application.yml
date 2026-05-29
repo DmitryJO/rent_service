@@ -7,19 +7,34 @@ spring:
     public-prefix-path: ${RENT_SERVICE_PUBLIC_URL_PREFIX:/ru.dmsmirnov.rent.api/rent}
     private-prefix-path: ${RENT_SERVICE_PRIVATE_URL_PREFIX:/rent}
   datasource:
-    url: ${RENT_SERVICE_DB_JDBC_URL:jdbc:postgresql://localhost:5432/rent_service?currentSchema=rent_service&user=postgres&password=postgres}
+    url: ${RENT_SERVICE_DB_JDBC_URL:jdbc:postgresql://localhost:5432/rent_service}
+    username: ${RENT_SERVICE_DB_USERNAME:postgres}
+    password: ${RENT_SERVICE_DB_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
     hikari:
-      maxLifetime: ${SPRING_DATASOURCE_HIKARI_MAXLIFETIME:1800000}
+      max-lifetime: ${SPRING_DATASOURCE_HIKARI_MAXLIFETIME:1800000}
   jpa:
+    hibernate:
+      ddl-auto: validate
     properties:
       hibernate:
+        default_schema: ${RENT_SERVICE_DB_SCHEMA:rent_service}
         jdbc.lob.non_contextual_creation: true
     open-in-view: false
+    show-sql: ${RENT_SERVICE_JPA_SHOW_SQL:false}
   liquibase:
     enabled: ${RENT_SERVICE_LIQUIBASE_ENABLED:true}
     change-log: classpath:db/changelog/master.xml
-    default-schema: rent_service
+    default-schema: ${RENT_SERVICE_DB_SCHEMA:rent_service}
+  data:
+    redis:
+      host: ${RENT_SERVICE_REDIS_HOST:localhost}
+      port: ${RENT_SERVICE_REDIS_PORT:6379}
+      password: ${RENT_SERVICE_REDIS_PASSWORD:}
+  cache:
+    type: ${RENT_SERVICE_CACHE_TYPE:redis} #simple
+    redis:
+      time-to-live: ${RENT_SERVICE_CACHE_TTL:600000}
 
 info:
   application:
@@ -38,3 +53,7 @@ springdoc:
   swagger-ui:
     operations-sorter: method
     tags-sorter: alpha
+
+rent:
+  admin:
+    stub-enabled: ${RENT_ADMIN_STUB_ENABLED:true}

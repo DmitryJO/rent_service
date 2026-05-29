@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+
+    <changeSet id="V1-001-create-schema" author="rent-service">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <dbms type="postgresql"/>
+                <sqlCheck expectedResult="0">
+                    SELECT COUNT(*) FROM information_schema.schemata WHERE schema_name = 'rent_service'
+                </sqlCheck>
+            </and>
+        </preConditions>
+        <sql>CREATE SCHEMA rent_service;</sql>
+    </changeSet>
+
+    <changeSet id="V1-002-create-users" author="rent-service">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <dbms type="postgresql"/>
+                <sqlCheck expectedResult="1">
+                    SELECT COUNT(*) FROM information_schema.schemata WHERE schema_name = 'rent_service'
+                </sqlCheck>
+                <not>
+                    <tableExists schemaName="rent_service" tableName="users"/>
+                </not>
+            </and>
+        </preConditions>
+        <createTable schemaName="rent_service" tableName="users">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="email" type="VARCHAR(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="password_hash" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="role" type="VARCHAR(32)" defaultValue="ROLE_USER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITH TIME ZONE" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP WITH TIME ZONE" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="V1-003-create-categories" author="rent-service">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <dbms type="postgresql"/>
+                <sqlCheck expectedResult="1">
+                    SELECT COUNT(*) FROM information_schema.schemata WHERE schema_name = 'rent_service'
+                </sqlCheck>
+                <not>
+                    <tableExists schemaName="rent_service" tableName="categories"/>
+                </not>
+            </and>
+        </preConditions>
+        <createTable schemaName="rent_service" tableName="categories">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(128)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="description" type="TEXT"/>
+            <column name="created_at" type="TIMESTAMP WITH TIME ZONE" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP WITH TIME ZONE" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="V1-004-create-items" author="rent-service">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <dbms type="postgresql"/>
+                <tableExists schemaName="rent_service" tableName="categories"/>
+                <not>
+                    <tableExists schemaName="rent_service" tableName="items"/>
+                </not>
+            </and>
+        </preConditions>
+        <createTable schemaName="rent_service" tableName="items">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="category_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="TEXT"/>
+            <column name="condition" type="VARCHAR(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="price_per_day" type="NUMERIC(10, 2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="quantity" type="INTEGER" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="image_urls" type="JSONB" defaultValueComputed="'[]'::jsonb">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITH TIME ZONE" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP WITH TIME ZONE" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint
+                baseTableSchemaName="rent_service"
+                baseTableName="items"
+                baseColumnNames="category_id"
+                referencedTableSchemaName="rent_service"
+                referencedTableName="categories"
+                referencedColumnNames="id"
+                constraintName="fk_items_category_id"
+                onDelete="RESTRICT"/>
+    </changeSet>
+
+    <changeSet id="V1-005-create-rental-orders" author="rent-service">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <dbms type="postgresql"/>
+                <tableExists schemaName="rent_service" tableName="users"/>
+                <tableExists schemaName="rent_service" tableName="items"/>
+                <not>
+                    <tableExists schemaName="rent_service" tableName="rental_orders"/>
+                </not>
+            </and>
+        </preConditions>
+        <createTable schemaName="rent_service" tableName="rental_orders">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_id" type="BIGINT"/>
+            <column name="item_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="customer_full_name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="customer_phone" type="VARCHAR(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="start_date" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="end_date" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="VARCHAR(32)" defaultValue="PENDING">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version" type="BIGINT" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITH TIME ZONE" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP WITH TIME ZONE" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint
+                baseTableSchemaName="rent_service"
+                baseTableName="rental_orders"
+                baseColumnNames="user_id"
+                referencedTableSchemaName="rent_service"
+                referencedTableName="users"
+                referencedColumnNames="id"
+                constraintName="fk_rental_orders_user_id"
+                onDelete="SET NULL"/>
+        <addForeignKeyConstraint
+                baseTableSchemaName="rent_service"
+                baseTableName="rental_orders"
+                baseColumnNames="item_id"
+                referencedTableSchemaName="rent_service"
+                referencedTableName="items"
+                referencedColumnNames="id"
+                constraintName="fk_rental_orders_item_id"
+                onDelete="RESTRICT"/>
+    </changeSet>
+
+    <changeSet id="V1-006-seed-categories" author="rent-service">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <dbms type="postgresql"/>
+                <tableExists schemaName="rent_service" tableName="categories"/>
+                <sqlCheck expectedResult="0">
+                    SELECT COUNT(*) FROM rent_service.categories
+                </sqlCheck>
+            </and>
+        </preConditions>
+        <insert schemaName="rent_service" tableName="categories">
+            <column name="name" value="Стройка"/>
+            <column name="description" value="Инструменты и оборудование для строительных работ"/>
+        </insert>
+        <insert schemaName="rent_service" tableName="categories">
+            <column name="name" value="Съёмка"/>
+            <column name="description" value="Камеры, объективы, штативы, осветительное оборудование"/>
+        </insert>
+        <insert schemaName="rent_service" tableName="categories">
+            <column name="name" value="Игровые приставки"/>
+            <column name="description" value="Консоли, контроллеры, аксессуары"/>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>

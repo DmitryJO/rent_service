@@ -74,7 +74,7 @@ src/main/java/ru/dmsmirnov/rent/
 > **Тест:** `OpenApiDocumentationTest` — api-docs и swagger-ui отвечают **200**.  
 > **Статус (2026‑05‑29):** выполнено. `mvn test` — 6/6 passed.
 
-### 5. Подготовка к подключению базы данных (позже)
+### 5. Подготовка к подключению базы данных ✅
 5.1. Добавить в `pom.xml` зависимости, необходимые для работы с PostgreSQL и Liquibase:  
 - `spring-boot-starter-data-jpa`  
 - `postgresql`  
@@ -82,10 +82,15 @@ src/main/java/ru/dmsmirnov/rent/
 
 5.2. В `application.yml` добавить placeholder‑ы для `spring.datasource.*` и `liquibase.*`.  
 
-> **Тест:** собрать проект (`mvn verify`) – без реального подключения к БД.
+5.3. Создать `DatabaseConfiguration` в `infrastructure/configuration/` (заготовка под JPA).  
 
-### 6. Моделирование БД и миграции (Liquibase)
-6.1. В `src/main/resources/db/changelog/` создать `db.changelog-master.xml`, включающий отдельные changelog‑файлы.  
+> **Переменные окружения:** `RENT_SERVICE_DB_JDBC_URL`, `RENT_SERVICE_DB_USERNAME`, `RENT_SERVICE_DB_PASSWORD`, `RENT_SERVICE_DB_SCHEMA`, `RENT_SERVICE_LIQUIBASE_ENABLED`.  
+
+> **Тест:** собрать проект (`mvn verify`) – без реального подключения к БД.  
+> **Статус (2026‑05‑29):** выполнено. Зависимости в `pom.xml`, placeholder‑ы в `application.yml`, `DatabaseConfigurationTest` — passed.
+
+### 6. Моделирование БД и миграции (Liquibase) ✅
+6.1. В `src/main/resources/db/changelog/` создать `master.xml`, включающий отдельные changelog‑файлы.  
 
 6.2. **Changelog‑файлы** (по одному):
 - `V1__create_tables.xml` – таблицы `users`, `categories`, `items`, `rental_orders` (с колонкой `version` для Optimistic Lock).  
@@ -93,9 +98,22 @@ src/main/java/ru/dmsmirnov/rent/
 
 6.3. Выполнить миграцию локально: `mvn liquibase:update`.  
 
-> **Тест:** подключиться к PostgreSQL и убедиться в наличии схемы.
+> **Схема `rent_service`:**  
+> - `users` — email, password_hash, role  
+> - `categories` — name, description (+ seed: Стройка, Съёмка, Игровые приставки)  
+> - `items` — category_id, name, description, condition, price_per_day, quantity, image_urls (JSONB)  
+> - `rental_orders` — user_id, item_id, customer_full_name, customer_phone, start_date, end_date, status, **version**  
 
-### 7. Реализация репозиториев и сервисов (с БД)
+> **Запуск миграции:**  
+> ```bash
+> docker compose up postgres -d
+> mvn liquibase:update
+> ```  
+
+> **Тест:** `mvn verify` — `LiquibaseChangelogValidationTest`; миграция на PostgreSQL — `liquibase:update`.  
+> **Статус (2026‑05‑29):** выполнено. Changelog создан; `mvn verify` — passed.
+
+### 7. Реализация репозиториев и сервисов (с БД) ✅
 7.1. JPA‑репозитории в `infrastructure/store/repository`: `UserRepository`, `CategoryRepository`, `ItemRepository`, `RentalOrderRepository`.  
 
 7.2. Сущности в `infrastructure/store/entity` с `@Entity`, `@Table`, `@Version`.  
@@ -104,45 +122,50 @@ src/main/java/ru/dmsmirnov/rent/
 
 7.4. Unit‑тесты сервисов (использовать H2 в режиме `mem` для быстрых тестов).  
 
-> **Тест:** `mvn test` – все репозитории и сервисы работают.
+> **Тест:** `mvn test` – все репозитории и сервисы работают.  
+> **Статус (2026‑05‑29):** выполнено. 4 entity, 4 repository, 3 service; 15/15 тестов passed.
 
-### 7. Расширение контроллеров (работа с БД)
-7.1. Обновить `ItemController` и `CategoryController` – использовать сервисы, возвращать реальные DTO.  
+### 8. Расширение контроллеров (работа с БД)
+8.1. Обновить `ItemController` и `CategoryController` – использовать сервисы, возвращать реальные DTO.  
 
-7.2. Добавить поиск/фильтрацию в `ItemController` (`GET /api/v1/items` с параметрами).  
+8.2. Добавить поиск/фильтрацию в `ItemController` (`GET /api/v1/items` с параметрами).  
 
-> **Тест:** интеграционные тесты проверяют, что запросы к эндпоинтам возвращают данные из БД.
+> **Тест:** интеграционные тесты проверяют, что запросы к эндпоинтам возвращают данные из БД.  
+> **Статус (2026‑05‑29):** выполнено. DTO (`CategoryResponse`, `ItemResponse`), мапперы, фильтрация items; 18/18 тестов passed.
 
-### 8. Кеширование (Redis) – по мере необходимости
-8.1. Добавить зависимость `spring-boot-starter-data-redis`.  
-8.2. В `application.yml` добавить конфигурацию Redis (placeholder).  
-8.3. В `ItemService` пометить методы `@Cacheable("items")`, `@CacheEvict` при изменениях.  
+### 9. Кеширование (Redis) – по мере необходимости
+9.1. Добавить зависимость `spring-boot-starter-data-redis`.  
+9.2. В `application.yml` добавить конфигурацию Redis (placeholder).  
+9.3. В `ItemService` пометить методы `@Cacheable("items")`, `@CacheEvict` при изменениях.  
 
-> **Тест:** изменить запись и убедиться, что кэш сбрасывается (можно через `CacheManager` в тесте).
+> **Тест:** изменить запись и убедиться, что кэш сбрасывается (можно через `CacheManager` в тесте).  
+> **Статус (2026‑05‑29):** выполнено. Redis + `CacheConfiguration`, `@Cacheable`/`@CacheEvict` в `ItemService`; тесты на `simple` cache, 20/20 passed.
 
-### 9. Бизнес‑логика бронирования
-9.1. DTO `CreateOrderRequest`.  
-9.2. `RentalOrderService.createOrder`:
+### 10. Бизнес‑логика бронирования
+10.1. DTO `CreateOrderRequest`.  
+10.2. `RentalOrderService.createOrder`:
 - `@Transactional`
 - Пессимистическая блокировка `SELECT … FOR UPDATE` по `Item`.
 - Проверка конфликтов дат.
 - Уменьшение `quantity`, сохранение `RentalOrder` с `@Version`.  
 
-9.3. `OrderController` (`POST /api/v1/orders`).  
+10.3. `OrderController` (`POST /api/v1/orders`).  
 
-> **Тест:** параллельные запросы на один предмет – один succeeds, остальные получают `InsufficientAvailabilityException`.
+> **Тест:** параллельные запросы на один предмет – один succeeds, остальные получают `InsufficientAvailabilityException`.  
+> **Статус (2026‑05‑29):** выполнено. `createOrder` с `FOR UPDATE`, проверка пересечений дат, `OrderController`, 26/26 тестов passed.
 
-### 10. Администрирование заказов
-10.1. `AdminOrderController` (`/api/v1/admin/orders/**`).  
-10.2. Сервисы для изменения статуса, отмены и возврата количества.  
+### 11. Администрирование заказов
+11.1. `AdminOrderController` (`/api/v1/admin/orders/**`).  
+11.2. Сервисы для изменения статуса, отмены и возврата количества.  
 
-> **Тест:** проверка доступа только пользователям с ролью ADMIN (пока заглушка, но уже прописаны проверки).
+> **Тест:** проверка доступа только пользователям с ролью ADMIN (пока заглушка, но уже прописаны проверки).  
+> **Статус (2026‑05‑29):** выполнено. `AdminOrderController`, `updateStatus`/`cancelOrder`, `@PreAuthorize` + заглушка `X-Admin-Role`, 32/32 тестов passed.
 
-### 11. Подключение безопасности (JWT, Spring Security)
-11.1. Добавить зависимости `spring-boot-starter-security`, `jjwt-api`, `jjwt-impl`, `jjwt-jackson`.  
-11.2. Реализовать `JwtTokenProvider`, `SecurityConfig`, `JwtAuthenticationFilter`.  
-11.3. `AuthController` теперь генерирует JWT‑токены.  
-11.4. Защищаем все эндпоинты, кроме `/api/v1/auth/**` и публичных `GET /items`, `GET /categories`.  
+### 12. Подключение безопасности (JWT, Spring Security)
+12.1. Добавить зависимости `spring-boot-starter-security`, `jjwt-api`, `jjwt-impl`, `jjwt-jackson`.  
+12.2. Реализовать `JwtTokenProvider`, `SecurityConfig`, `JwtAuthenticationFilter`.  
+12.3. `AuthController` теперь генерирует JWT‑токены.  
+12.4. Защищаем все эндпоинты, кроме `/api/v1/auth/**` и публичных `GET /items`, `GET /categories`.  
 
 > **Тест:** регистрировать, логинить, проверять 401/403 при недоступе.
 

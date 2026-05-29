@@ -3,8 +3,10 @@
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
-      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
 
-    <!--    <include relativeToChangelogFile="true" file="init/changelog.init.xml"/>-->
+    <include relativeToChangelogFile="true" file="V1__create_tables.xml"/>
+    <include relativeToChangelogFile="true" file="V2__add_indexes.xml"/>
+    <include relativeToChangelogFile="true" file="V3__rental_order_dates_as_date.xml"/>
 
 </databaseChangeLog>
