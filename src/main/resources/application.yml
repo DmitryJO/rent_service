@@ -1,0 +1,41 @@
+server:
+  port: ${SERVER_PORT:8080}
+
+spring:
+  application:
+    name: rent-service
+    public-prefix-path: ${RENT_SERVICE_PUBLIC_URL_PREFIX:/ru.dmsmirnov.rent.api/rent}
+    private-prefix-path: ${RENT_SERVICE_PRIVATE_URL_PREFIX:/rent}
+  datasource:
+    url: ${RENT_SERVICE_DB_JDBC_URL:jdbc:postgresql://localhost:5432/rent_service?currentSchema=rent_service&user=postgres&password=postgres}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maxLifetime: ${SPRING_DATASOURCE_HIKARI_MAXLIFETIME:1800000}
+  jpa:
+    properties:
+      hibernate:
+        jdbc.lob.non_contextual_creation: true
+    open-in-view: false
+  liquibase:
+    enabled: ${RENT_SERVICE_LIQUIBASE_ENABLED:true}
+    change-log: classpath:db/changelog/master.xml
+    default-schema: rent_service
+
+info:
+  application:
+    version: '@project.version@'
+
+logging:
+  pattern:
+    console: "${LOG_CONSOLE_PATTERN:%d{yyyy-MM-dd HH:mm:ss.SSS} %+5level --- [%+15.15thread] %-40.40logger{36} : %msg%n}"
+  level:
+    ROOT: INFO
+    ru.neuroland.mnemonica.RENT: ${RENT_SERVICE_LOG_LEVEL:INFO}
+    org.springframework: ${RENT_SERVICE_LOG_LEVEL_SPRING:INFO}
+
+springdoc:
+  packagesToScan: ru.dmsmirnov.rent.api.controller
+  api-docs:
+    path: ${spring.application.private-prefix-path}/swagger/v3/api-docs
+  swagger-ui:
+    path: ${spring.application.private-prefix-path}/swagger-ui
