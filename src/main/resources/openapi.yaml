@@ -1,0 +1,63 @@
+openapi: 3.0.3
+info:
+  title: Rent Service API
+  description: REST API сервиса аренды вещей
+  version: 0.0.1-SNAPSHOT
+  contact:
+    name: Rent Service Team
+    email: support@rent-service.local
+servers:
+  - url: http://localhost:8080
+    description: Локальный сервер
+tags:
+  - name: Auth
+    description: Регистрация и аутентификация
+  - name: Items
+    description: Каталог арендуемых вещей
+  - name: Categories
+    description: Категории вещей
+paths:
+  /api/v1/auth/register:
+    post:
+      tags: [Auth]
+      summary: Регистрация пользователя
+      operationId: register
+      responses:
+        '200':
+          description: Успешная регистрация
+  /api/v1/auth/login:
+    post:
+      tags: [Auth]
+      summary: Вход в систему
+      operationId: login
+      responses:
+        '200':
+          description: Успешная аутентификация
+  /api/v1/items:
+    get:
+      tags: [Items]
+      summary: Список вещей
+      operationId: getItems
+      responses:
+        '200':
+          description: Список вещей (может быть пустым)
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+  /api/v1/categories:
+    get:
+      tags: [Categories]
+      summary: Список категорий
+      operationId: getCategories
+      responses:
+        '200':
+          description: Список категорий (может быть пустым)
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object

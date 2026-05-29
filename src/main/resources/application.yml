@@ -23,7 +23,7 @@ spring:
 
 info:
   application:
-    version: '@project.version@'
+    version: ${APP_VERSION:0.0.1-SNAPSHOT}
 
 logging:
   pattern:
@@ -34,8 +34,7 @@ logging:
     org.springframework: ${RENT_SERVICE_LOG_LEVEL_SPRING:INFO}
 
 springdoc:
-  packagesToScan: ru.dmsmirnov.rent.api.controller
-  api-docs:
-    path: ${spring.application.private-prefix-path}/swagger/v3/api-docs
+  packages-to-scan: ru.dmsmirnov.rent.api.controller.rest
   swagger-ui:
-    path: ${spring.application.private-prefix-path}/swagger-ui
+    operations-sorter: method
+    tags-sorter: alpha

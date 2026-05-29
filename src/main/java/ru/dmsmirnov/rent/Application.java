@@ -11,7 +11,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 public class Application {
 
     public static void main(String[] args) {
-        System.out.println("Helllo epta");
         SpringApplication.run(Application.class, args);
     }
 

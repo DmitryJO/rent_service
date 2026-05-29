@@ -23,16 +23,36 @@ src/
 │   │   └─ ru/dmsmirnov/rent/
 │   │       ├─ Application.java
 │   │       ├─ api/
+│   │       │   └─ controller/
+│   │       │       ├─ advice/              — ControllerAdvice (обработка ошибок)
+│   │       │       └─ rest/                — REST-контроллеры (Auth, Item, Category)
 │   │       ├─ domain/
-│   │       └─ infrastructure/
+│   │       │   ├─ enums/
+│   │       │   ├─ exception/
+│   │       │   └─ service/
+│   │       └─ infrastructure/              — инфраструктура приложения
+│   │           ├─ configuration/           — конфигурация (Spring, Security, БД)
+│   │           └─ store/                   — слой хранения (БД)
+│   │               ├─ repository/
+│   │               └─ entity/
 │   └─ resources/
 │       ├─ application.yml
-│       ├─ db/
-│       │   └─ changelog/
-│       └─ application.yml
+│       ├─ openapi.yaml          — OpenAPI-спецификация
+│       └─ db/changelog/         — заготовки Liquibase
 └─ test/
-    └─ java/...
+    ├─ java/ru/dmsmirnov/rent/api/  — интеграционные тесты контроллеров
+    └─ resources/application.yml    — отключение БД для тестов
 ```
+
+### Текущий прогресс (MVP, шаги 1–3)
+
+| Шаг | Статус | Примечание |
+|-----|--------|------------|
+| 1. Инициализация Maven/Spring Boot | ✅ | Java 17, полный набор зависимостей проекта |
+| 2. Структура пакетов | ✅ | `api`, `domain`, `infrastructure` |
+| 3. Заглушки контроллеров + тесты | ✅ | `mvn test` — 4/4 passed |
+| 4. Swagger / OpenAPI | ✅ | `/swagger-ui/index.html` |
+| 5. Подключение БД | ⏳ | следующий шаг |
 
 ## Технологический стек
 
@@ -91,7 +111,7 @@ src/
 
 **Вся документация проекта должна вестись на русском языке.**
 - Спецификация OpenAPI 3 хранится в `src/main/resources/openapi.yaml`.
-- Swagger UI доступен по пути `/swagger-ui.html`.
+- Swagger UI доступен по пути `/swagger-ui/index.html`, OpenAPI JSON — `/v3/api-docs`.
 
 ## Развёртывание
 
